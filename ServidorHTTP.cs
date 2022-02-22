@@ -9,11 +9,12 @@ using System.Web;
 
 class ServidorHttp
 {
-    private TcpListener Controlador { get; set; }
+    private TcpListener? Controlador { get; set; }
     private int Porta { get; set; }
     private int QtdeRequests { get; set; }
-    public string HtmlExemplo { get; set; }
-    private SortedList<string,string> TiposMime{ get; set; }
+    public string? HtmlExemplo { get; set; }
+    private SortedList<string,string>? TiposMime{ get; set; }
+    private SortedList<string,string>? DiretoriosHost{ get; set; }
 
     public ServidorHttp(int porta = 8080){
         this.Porta = porta;
