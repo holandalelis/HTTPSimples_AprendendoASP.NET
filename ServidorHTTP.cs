@@ -9,17 +9,18 @@ using System.Web;
 
 class ServidorHttp
 {
-    private TcpListener? Controlador { get; set; }
+    private TcpListener Controlador { get; set; }
     private int Porta { get; set; }
     private int QtdeRequests { get; set; }
-    public string? HtmlExemplo { get; set; }
-    private SortedList<string,string>? TiposMime{ get; set; }
-    private SortedList<string,string>? DiretoriosHost{ get; set; }
+    public string HtmlExemplo { get; set; }
+    private SortedList<string,string> TiposMime{ get; set; }
+    private SortedList<string,string> DiretoriosHosts{ get; set; }
 
     public ServidorHttp(int porta = 8080){
         this.Porta = porta;
         this.CriarHtmlExemplo();
         this.PopularTiposMIME();
+        this.PopularDiretoriosHost();
         try
         {
             this.Controlador = new TcpListener(IPAddress.Parse("127.0.0.1"), this.Porta);
@@ -71,7 +72,7 @@ class ServidorHttp
                 byte[] bytesCabecalho;
                 byte[] bytesConteudo;
 
-                FileInfo fiArquivo = new FileInfo(ObterCaminhoFisicoArquivo(recursoBuscado));
+                FileInfo fiArquivo = new FileInfo(ObterCaminhoFisicoArquivo(nomeHost, recursoBuscado));
                 if (fiArquivo.Exists)
                 {
                     if (TiposMime.ContainsKey(fiArquivo.Extension.ToLower()))
@@ -139,9 +140,15 @@ class ServidorHttp
         this.TiposMime.Add(".dhtml", "text/html;charset=utf-8");
     }
 
-    public string ObterCaminhoFisicoArquivo(string arquivo)
+    private void PopularDiretoriosHost()
     {
-        string caminhoArquivo = "C:\\Users\\pedro\\Desktop\\Projetos Estudo\\Projeto_CRUD\\www" + arquivo.Replace("/", "\\");
+        this.DiretoriosHosts = new SortedList<string, string>();
+        this.DiretoriosHosts.Add("localhost", "C:\\Users\\pedro\\Desktop\\Projetos Estudo\\Projeto_CRUD\\www\\localhost");
+    }
+    public string ObterCaminhoFisicoArquivo(string host, string arquivo)
+    {
+        string diretorio = this.DiretoriosHosts[host.Split(":")[0]];
+        string caminhoArquivo = diretorio + arquivo.Replace("/", "\\");
         return caminhoArquivo;
     }
 
