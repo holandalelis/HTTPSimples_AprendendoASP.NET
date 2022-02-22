@@ -13,10 +13,12 @@ class ServidorHttp
     private int Porta { get; set; }
     private int QtdeRequests { get; set; }
     public string HtmlExemplo { get; set; }
+    private SortedList<string,string> TiposMime{ get; set; }
 
     public ServidorHttp(int porta = 8080){
         this.Porta = porta;
         this.CriarHtmlExemplo();
+        this.PopularTiposMIME();
         try
         {
             this.Controlador = new TcpListener(IPAddress.Parse("127.0.0.1"), this.Porta);
@@ -66,16 +68,29 @@ class ServidorHttp
 
 
                 byte[] bytesCabecalho;
-                var bytesConteudo = LerArquivo(recursoBuscado);
-                if (bytesConteudo.Length >0)
+                byte[] bytesConteudo;
+
+                FileInfo fiArquivo = new FileInfo(ObterCaminhoFisicoArquivo(recursoBuscado));
+                if (fiArquivo.Exists)
                 {
-                    bytesCabecalho = GerarCabecalho(versaoHttp,  "text/html;charset=utf-8", "200", bytesConteudo.Length);
+                    if (TiposMime.ContainsKey(fiArquivo.Extension.ToLower()))
+                    {
+                        bytesConteudo = File.ReadAllBytes(fiArquivo.FullName);
+                        string tipoMime = TiposMime[fiArquivo.Extension.ToLower()];                        
+                        bytesCabecalho = GerarCabecalho(versaoHttp,  tipoMime, "200", bytesConteudo.Length);
+                    }
+                    else
+                    {
+                        bytesConteudo = Encoding.UTF8.GetBytes("<h1>Erro 415 - Tipo de arquivo não suportado.</h1>");
+                        bytesCabecalho = GerarCabecalho(versaoHttp, "text/html;charset=utf-8", "415", bytesConteudo.Length);
+                    }
                 }
                 else
                 {
                     bytesConteudo = Encoding.UTF8.GetBytes("<h1>Erro 404 - Arquivo Não encontrado</h1>");
                     bytesCabecalho = GerarCabecalho(versaoHttp, "text/html;charset=utf-8", "404", bytesConteudo.Length);
                 }
+
                 int bytesEnviados = conexao.Send(bytesCabecalho, bytesCabecalho.Length, 0);
                 bytesEnviados += conexao.Send(bytesConteudo, bytesConteudo.Length, 0);
                 conexao.Close();
@@ -104,20 +119,29 @@ class ServidorHttp
         html.Append("<h1>Página Estática</h1></body></html>");
         this.HtmlExemplo = html.ToString();
     }
-
-    public byte[] LerArquivo(string recurso)
+    
+    private void PopularTiposMIME()
     {
-        string diretorio = 
-        "C:\\Users\\pedro\\Desktop\\Projetos Estudo\\Projeto_CRUD\\www";
-        string caminhoArquivo = diretorio + recurso.Replace("/", "\\");
-        if (File.Exists(caminhoArquivo))
-        {
-            return File.ReadAllBytes(caminhoArquivo);
-        }
-        else
-        {
-            return new byte[0];
-        }
+        this.TiposMime = new SortedList<string, string>();
+        this.TiposMime.Add(".html", "text/html;charset=utf-8");
+        this.TiposMime.Add(".htm", "text/html;charset=utf-8");
+        this.TiposMime.Add(".css", "text/css");
+        this.TiposMime.Add(".js", "text/javascript");
+        this.TiposMime.Add(".png", "image/png");
+        this.TiposMime.Add(".jpg", "image/jpeg");
+        this.TiposMime.Add(".gif", "image/gif");
+        this.TiposMime.Add(".svg", "image/svg+xml");
+        this.TiposMime.Add(".webp", "image/webp");
+        this.TiposMime.Add(".ico", "image/ico");
+        this.TiposMime.Add(".woff", "font/woff");
+        this.TiposMime.Add(".woff2", "font/woff2");
+        this.TiposMime.Add(".dhtml", "text/html;charset=utf-8");
     }
-    //comentário.
+
+    public string ObterCaminhoFisicoArquivo(string arquivo)
+    {
+        string caminhoArquivo = "C:\\Users\\pedro\\Desktop\\Projetos Estudo\\Projeto_CRUD\\www" + arquivo.Replace("/", "\\");
+        return caminhoArquivo;
+    }
+
 }
