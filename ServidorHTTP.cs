@@ -51,18 +51,16 @@ class ServidorHttp
             conexao.Receive(bytesRequisicao, bytesRequisicao.Length, 0);
             string textoRequisicao = Encoding.UTF8.GetString(bytesRequisicao)
                 .Replace((char)0, ' ').Trim();
-
             if (textoRequisicao.Length >0)
             {
                 Console.WriteLine($"\n{textoRequisicao}\n");
-
-                var bytesConteudo = Encoding.UTF8.GetBytes(this.HtmlExemplo, 0, this.HtmlExemplo.Length);
+                var bytesConteudo = LerArquivo("/index.html");
                 var bytesCabecalho = GerarCabecalho("HTTP/1.1",  "text/html;charset=utf-8", "200", bytesConteudo.Length);
                 int bytesEnviados = conexao.Send(bytesCabecalho, bytesCabecalho.Length, 0);
                 bytesEnviados += conexao.Send(bytesConteudo, bytesConteudo.Length, 0);
                 conexao.Close();
                 Console.WriteLine($"\n{bytesEnviados} bytes enviados em resposta à requsição #{numeroRequest}.");
-                }
+            }
         }
         Console.WriteLine($"\n Request {numeroRequest} finalizado.");
     }
@@ -89,6 +87,14 @@ class ServidorHttp
 
     public byte[] LerArquivo(string recurso)
     {
-        string diretorio = "";
+        string diretorio = 
+        "C:\\Users\\pedro\\Desktop\\Projetos Estudo\\Projeto_CRUD\\www";
+        string caminhoArquivo = diretorio + recurso.Replace("/", "\\");
+        if (File.Exists(caminhoArquivo))
+        {
+            return File.ReadAllBytes(caminhoArquivo);
+        }
+        else return new byte[0];
+        ]
     }
 }
