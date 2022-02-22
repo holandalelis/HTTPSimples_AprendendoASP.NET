@@ -94,7 +94,9 @@ class ServidorHttp
         {
             return File.ReadAllBytes(caminhoArquivo);
         }
-        else return new byte[0];
-        ]
+        else
+        {
+            return new byte[0];
+        }
     }
 }
