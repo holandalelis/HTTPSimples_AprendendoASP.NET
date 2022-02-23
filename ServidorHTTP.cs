@@ -63,7 +63,9 @@ class ServidorHttp
                 int iPrimeiroEspaco = linhas [0].IndexOf(' ');
                 int iSegundoEspaco = linhas[0].LastIndexOf(' ');
                 string metodoHtttp = linhas[0].Substring(0, iPrimeiroEspaco);
-                string recursoBuscado = linhas[0].Substring(iPrimeiroEspaco +1, iSegundoEspaco - iPrimeiroEspaco -1);
+                string recursoBuscado = linhas[0].Substring(iPrimeiroEspaco +1, iSegundoEspaco - iPrimeiroEspaco -1);   
+                if (recursoBuscado == "/") recursoBuscado= "/index.html";
+                recursoBuscado = recursoBuscado.Split("?")[0];
                 string versaoHttp = linhas[0].Substring(iSegundoEspaco +1);
                 iPrimeiroEspaco = linhas[1].IndexOf(' ');
                 string nomeHost = linhas[1].Substring(iPrimeiroEspaco+1);
